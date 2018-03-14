@@ -4,6 +4,7 @@ import sys
 
 import matplotlib.pyplot as plt
 from matplotlib import cm as cm
+import seaborn as sns
 
 '''
 Sample of Data Analytics on Youtube Trending Using Python
@@ -20,25 +21,16 @@ class Plot_trend:
         print(selected_corr)
 
         fig = plt.figure()
-        fig.suptitle('US-Video Correlation Matrix', y=0.97)
         ax1 = fig.add_subplot(111)
-        #ax1.grid(True)
-        cmap = cm.get_cmap('jet', 30)
+        sns.heatmap(selected_corr, mask=np.zeros_like(selected_corr, dtype=np.bool),
+                    cmap=sns.diverging_palette(10, 240, as_cmap=True), xticklabels=selected_corr.columns.values,
+                    yticklabels=selected_corr.columns.values,square=True, ax=ax1)
+        ax1.set_title('US-Video Correlation Matrix')
+        ax1.set_xticklabels(selected_corr.columns.values, rotation=45, fontsize=8)
+        ax1.set_yticklabels(selected_corr.columns.values, fontsize=8)
 
-        cax = ax1.imshow(selected_corr, interpolation="nearest", cmap=cmap )
-        #plt.title('US-Video Correlation Matrix')
-        labels = ['','category_id','views', 'likes', 'dislikes','comment_count']
-
-        ax1.set_xticklabels([])
-        ax1.set_yticklabels(labels, fontsize=6)
-
-        ax2 = ax1.twiny()
-        ax2.set_xlim(ax1.get_xlim())
-        ax2.set_xticks(ax1.get_xticks())
-        ax2.set_xticklabels(labels, fontsize=6)
-
-        # Add colorbar, make sure to specify tick locations to match desired ticklabels
-        fig.colorbar(cax, ticks=[.1, .5, .8, .90, .95, 1])
+        # Tweak spacing to prevent clipping of tick-labels
+        plt.subplots_adjust(top=.9,bottom=0.2)
 
         plt.show()
 
