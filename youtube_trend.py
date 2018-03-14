@@ -3,7 +3,6 @@ import pandas as pd
 import sys
 
 import matplotlib.pyplot as plt
-from matplotlib import cm as cm
 import seaborn as sns
 
 '''
@@ -13,10 +12,11 @@ Copyright: Skalskip and Donyoe of Kaggle.com'''
 
 class Plot_trend:
 
-    def trend_corr(self, data):
+    def trend_corr(self, videos):
 
         column_names = ['category_id','views', 'likes', 'dislikes','comment_count']
-        corr = data.corr()
+
+        corr = videos.corr()
         selected_corr = corr.loc[column_names, column_names]
         print(selected_corr)
 
@@ -34,6 +34,41 @@ class Plot_trend:
 
         plt.show()
 
+    def publish_htm(self,videos):
+
+        # We choose the 10 most trending videos
+
+        most_views_likes = videos.sort_values(by=['views','likes'], ascending=False).head(10)
+
+        # Construction of HTML table with miniature photos assigned to the most popular movies
+        table_content = ''
+        max_title_length = 50
+
+        for date, row in most_views_likes.T.iteritems():
+            HTML_row = '<tr>'
+            HTML_row += '<td><img src="' + str(row['thumbnail_link']) + '"style="width:100px;height:100px;"></td>'
+            HTML_row += '<td>' + str(row['channel_title']) + '</td>'
+            HTML_row += '<td>' + str(row['title']) + '</td>'
+            HTML_row += '<td>' + str(row['views']) + '</td>'
+            HTML_row += '<td>' + str(row['likes']) + '</td>'
+            HTML_row += '<td>' + str(row['publish_date']) + '</td>'
+            HTML_row += '<td>' + str(row['trending_date']) + '</td>'
+            HTML_row += '<td>' + str(row['category']) + '</td>'
+
+
+            table_content += HTML_row + '</tr>'
+
+        html_str = '<table><tr><th>Photo</th><th>Channel Title</th>' \
+                   '<th style="width:250px;">Title</th><th>Views</th>' \
+                   '<th>Likes</th><th>Publish Date</th><th>Trending_Date</th>' \
+                   '<th>Category</th></tr>{}</table>'.format(table_content)
+        html_frame = '<html><head>Top 10 Most Views and Likes</head><body>' + html_str + '</body></html>'
+        f = open("youtube_trending.html", "w", encoding='utf-8')
+        f.write(html_frame)
+        f.close()
+
+
+
     def publish_time(self, us_videos_first):
         # Initialization of the list storing counters for subsequent publication hours
         publish_h = [0] * 24
@@ -45,7 +80,7 @@ class Plot_trend:
         ind = np.arange(len(values))
 
         # Creating new plot
-        fig = plt.figure(figsize=(20, 10))
+        fig = plt.figure(figsize=(8,6))
         ax = fig.add_subplot(111)
         ax.yaxis.grid()
         ax.xaxis.grid()
@@ -68,8 +103,8 @@ def main(argv):
     us_videos_categories = pd.read_json('youtube_new\\US_category_id.json')
 
     # Quick check of data
-    print(us_videos.head(1))    # first line
-    print(us_videos.info())     # info of the head
+    #print(us_videos.head(1))    # first line
+    #print(us_videos.info())     # info of the head
 
     # Transforming Trending date column to datetime format
     us_videos['trending_date'] = pd.to_datetime(us_videos['trending_date'], format='%y.%d.%m').dt.date
@@ -81,7 +116,7 @@ def main(argv):
     us_videos['publish_hour'] = publish_time.dt.hour
 
     # Check again for changes
-    print(us_videos.head(1))
+    #print(us_videos.head(1))
 
     # We'll use a very nice python featur - dictionary comprehension, to extract most important data from US_category_id.json
     categories = {category['id']: category['snippet']['title'] for category in us_videos_categories['items']}
@@ -98,22 +133,22 @@ def main(argv):
     us_videos_first = us_videos.drop_duplicates(subset=['video_id'], keep='first', inplace=False)
 
     # Check, original and subsets
-    print("us_videos dataset contains {} videos".format(us_videos.shape[0]))
-    print("us_videos_first dataset contains {} videos".format(us_videos_first.shape[0]))
-    print("us_videos_last dataset contains {} videos".format(us_videos_last.shape[0]))
+    #print("us_videos dataset contains {} videos".format(us_videos.shape[0]))
+    #print("us_videos_first dataset contains {} videos".format(us_videos_first.shape[0]))
+    #print("us_videos_last dataset contains {} videos".format(us_videos_last.shape[0]))
 
     # Create a time_to_trend; trending in days
-    us_videos_first["time_to_trend"] = us_videos_first.trending_date - us_videos_first.publish_date
+    us_videos_first["time_to_trend"] = (us_videos_first.trending_date - us_videos_first.publish_date)/np.timedelta64(1,'D')
 
     publish = Plot_trend()
     # bar graph of best publishing hour
-    # publish.publish_time(us_videos_first)
+    #publish.publish_time(us_videos_first)
 
     # top 10 html display
-    #publish.publish_html(us_videos)
+    publish.publish_htm(us_videos_first)
 
     # correlation
-    publish.trend_corr(us_videos)
+    #publish.trend_corr(us_videos)
 
 if __name__ == '__main__':
     main(sys.argv)
