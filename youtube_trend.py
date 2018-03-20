@@ -130,7 +130,7 @@ def main(argv):
 
     # Now we will create new column that will represent name of category
     us_videos.insert(4, 'category', us_videos['category_id'].astype(str).map(categories))
-    # print(us_videos['category'].head(5)) # check new column
+    print(us_videos.info()) # check new column
 
     # percentage of dislikes
     us_videos['dislike_percentage'] = us_videos['dislikes'] / (us_videos['dislikes'] + us_videos['likes'])
