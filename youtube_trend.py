@@ -76,30 +76,19 @@ class PlotTrend(object):
 
     @staticmethod
     def publish_time(us_videos_first):
-        # Initialization of the list storing counters for subsequent publication hours
-        publish_h = [0] * 24
-
-        for index, row in us_videos_first.iterrows():   # row iteration in pandas
-            publish_h[row["publish_hour"]] += 1   # row item in 'publish hour' is matched to publish_h index, increments
-
-        values = publish_h
-        ind = np.arange(len(values))
 
         # Creating new plot
         fig = plt.figure(figsize=(8, 6))
         ax = fig.add_subplot(111)
         ax.yaxis.grid()
         ax.xaxis.grid()
-        bars = ax.bar(ind, values)
+        ax.hist(us_videos_first['publish_hour'], bins=24)
+        #bars = ax.bar(ind, values)
 
-        # Sampling of Colormap
-        '''for i, b in enumerate(bars):
-            b.set_color(plt.cm.viridis((values[i] - min(values)) / (max(values) - min(values))))'''
-
-        plt.ylabel('Number of videos that got trending', fontsize=20)
-        plt.xlabel('Time of publishing', fontsize=20)
-        plt.title('Best time to publish video', fontsize=35, fontweight='bold')
-        plt.xticks(np.arange(0, len(ind), len(ind) / 6), [0, 4, 8, 12, 16, 20])
+        ax.set_ylabel('Number of videos that got trending', fontsize=9)
+        ax.set_xlabel('Time of publishing', fontsize=9)
+        ax.set_title('Best time to publish video', fontsize=20, fontweight='bold')
+        ax.set_xticks([0, 4, 8, 12, 16, 20])
 
         plt.show()
 
@@ -151,10 +140,10 @@ def main(argv):
 
     publish = PlotTrend()
     # bar graph of best publishing hour
-    # publish.publish_time(us_videos_first)
+    publish.publish_time(us_videos_first)
 
     # top 10 html display
-    publish.publish_htm(us_videos)
+    # publish.publish_htm(us_videos)
 
     # correlation
     # publish.trend_corr(us_videos)
